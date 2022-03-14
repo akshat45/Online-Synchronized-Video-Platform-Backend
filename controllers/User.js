@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 import userModel from "../models/userSchema.js";
-
+import { Err } from "../helpers/errorHandler.js";
 
 export const userLogin = (req, res, next) => {
     const { username, password } = req.body;
@@ -74,3 +74,48 @@ export const userSignup = async (req, res, next) => {
         });
 };
 
+
+
+export const changePassword = (req, res, next) => {
+
+    const { currentPassword, password, confirmPassword } = req.body;
+
+    userModel.findById(req.user._id)
+        .then((user) => {
+            if (!user)
+                throw new Err("You request is not valid.", 400);
+            else {
+
+                if (password !== confirmPassword) {
+                    throw new Err("Password and Confirm Password don't match.", 403);
+                }
+
+                if (currentPassword == password) {
+                    throw new Err("Enter a new password.", 403);
+                }
+
+                bcrypt.compare(currentPassword, user.password)
+                    .then((check) => {
+                        if (check) {
+                            bcrypt.hash(password, 4)
+                                .then((hash) => {
+                                    user.password = hash;
+                                    user.save()
+                                        .then(() => res.status(200).json({ message: "Password successfully updated." }))
+                                        .catch((err) => {
+                                            next(err);
+                                        });
+                                })
+                                .catch((err) => {
+                                    next(err);
+                                });
+                        }
+                        else
+                        throw new Err("You are not authorized.", 401);
+                    })
+            }
+        })
+        .catch((err) => {
+            next(err);
+        });
+};
