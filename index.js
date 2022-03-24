@@ -7,7 +7,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { auth, socketAuth } from "./middlewares/auth.js";
+import { errorHandler } from "./helpers/errorHandler.js";
+// import handleSocket from "./controllers/socketController.js";
 import userRoute from "./routes/user.js";
+import roomRoute from "./routes/room.js"
 
 
 const app = express();
@@ -29,15 +32,16 @@ app.use(
 
 app.use(auth);
 app.use("/user", userRoute);
+app.use("/room", roomRoute);
 
 io.use(socketAuth);
-io.on("connection", (socket) => handleSocket(io, socket));
+// io.on("connection", (socket) => handleSocket(io, socket));
 
 const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(
-    `mongodb+srv://admin-akshat:${process.env.password}@cluster0.cdlt8.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+    `mongodb+srv://admin-akshat:${process.env.password}@cluster0.cdlt8.mongodb.net/WatchTube?retryWrites=true&w=majority`,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
