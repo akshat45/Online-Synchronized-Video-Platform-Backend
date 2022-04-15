@@ -8,10 +8,10 @@ dotenv.config();
 
 import { auth, socketAuth } from "./middlewares/auth.js";
 import { errorHandler } from "./helpers/errorHandler.js";
-// import handleSocket from "./controllers/socketController.js";
+import handleSocket from "./controllers/socketController.js";
 import userRoute from "./routes/user.js";
 import roomRoute from "./routes/room.js"
-
+import videoSearchRoute from "./routes/videoSearchRoute.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -33,9 +33,11 @@ app.use(
 app.use(auth);
 app.use("/user", userRoute);
 app.use("/room", roomRoute);
+app.post("/videoSearch", videoSearchRoute);
+app.use((err, req, res, next) => errorHandler(err, req, res, next));
 
 io.use(socketAuth);
-// io.on("connection", (socket) => handleSocket(io, socket));
+io.on("connection", (socket) => handleSocket(io, socket));
 
 const PORT = process.env.PORT || 5000;
 
